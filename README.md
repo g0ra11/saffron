@@ -4,3 +4,5 @@
 * pymongo
 * redis 
 * requests
+
+python v3.7
