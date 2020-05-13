@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>HappyShop</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <link rel="stylesheet" type="text/css" href="mystyle.css" />
+  </head>
+
+  <header>
+    <div
+      class="jumbotron text-white jumbotron-image shadow"
+      style="
+        background-image: url(https://www.ecopetit.cat/wpic/mpic/50-506143_royal-blue-background-wallpaper-luxury-blue-wallpaper-hd.png);
+      "
+    >
+      <h1>Your happy shop is online now.</h1>
+      <p>Don't miss exclusive deals!</p>
+    </div>
+  </header>
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#"
+        ><img
+          src="https://cdn1.iconfinder.com/data/icons/shopping-and-ecommerce-2/64/E-commerce_and_Shopping-98-512.png"
+          width="40"
+          height="40"
+          class="d-inline-block align-top"
+          alt=""
+      /></a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarText"
+        aria-controls="navbarText"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarText">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="menu.html">Catalog</a>
+          </li>
+        </ul>
+
+        <ul class="nav navbar-nav navbar-right">
+          <li class="nav-item">
+            <a
+              type="button"
+              class="btn btn-link mr-1"
+              onClick="toggleElement()"
+              style="display: inline;"
+              href="#"
+              ><i class="fas fa-shopping-basket"></i>
+              Cart
+            </a>
+          </li>
+          <li class="nav-item">
+            <button
+              type="button"
+              class="btn btn-link"
+              id="login"
+              onClick="toggleElement()"
+              style="display: inline;"
+              href="#"
+            >
+              Login
+            </button>
+          </li>
+          <li class="nav-item">
+            <button
+              type="button"
+              class="btn btn-link"
+              id="logout"
+              onClick="toggleElement()"
+              style="display: none;"
+              href="#"
+            >
+              Logout
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <main role="main">
+      <div class="container mt-4 mb-4">
+        <div class="row">
+          <div class="col-md-4 d-flex">
+            <div class="card text-center m-2">
+              <img
+                class="card-img-top"
+                src="https://s12emagst.akamaized.net/products/24652/24651141/images/res_26554286b16caacef0d0c050fa0b9c66_450x450_5ci3.jpg"
+                alt="Card image cap"
+              />
+              <div class="card-body">
+                <h5 class="card-title">Tableta Samsung Galaxy Tab S6</h5>
+                <p class="card-text">
+                  Octa-Core, 10.5", 6GB RAM, 128GB, 4G, Brown
+                </p>
+              </div>
+              <div class="card-footer">
+                <div class="col-md-12">
+                  <div class="d-flex">
+                    <div class="p-2">
+                      <div class="input-group input-group-sm">
+                        <input
+                          type="number"
+                          class="form-control quantity-box"
+                          value="1"
+                          placeholder="Qty."
+                          aria-label="Input group example"
+                          aria-describedby="btnGroupAddon"
+                        />
+                        <div class="input-group-append">
+                          <button
+                            class="btn btn-outline-secondary"
+                            type="button"
+                          >
+                            Add
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="p-2">
+                      <span class="badge badge-danger">3237 lei</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 d-flex">
+            <div class="card text-center m-2">
+              <img
+                class="card-img-top"
+                src="https://s12emagst.akamaized.net/products/18296/18295781/images/res_19541ec1cbdd59024c1b97a0f530fe9e_450x450_f5sv.jpg"
+                alt="Card image cap"
+              />
+              <div class="card-body">
+                <h5 class="card-title">Apple iPad Pro (2018)</h5>
+                <p class="card-text">
+                  11", 256GB, Wi-Fi, Silver
+                </p>
+              </div>
+              <div class="card-footer">
+                <div class="col-md-12">
+                  <div class="d-flex">
+                    <div class="p-2">
+                      <div class="input-group input-group-sm">
+                        <input
+                          type="number"
+                          class="form-control quantity-box"
+                          value="1"
+                          placeholder="Qty."
+                          aria-label="Input group example"
+                          aria-describedby="btnGroupAddon"
+                        />
+                        <div class="input-group-append">
+                          <button
+                            class="btn btn-outline-secondary"
+                            type="button"
+                          >
+                            Add
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="p-2">
+                      <span class="badge badge-danger">4879 lei</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 d-flex">
+            <div class="card text-center m-2">
+              <img
+                class="card-img-top"
+                src="https://s12emagst.akamaized.net/products/25334/25333525/images/res_d58bb96b65a1a066fe631713ca4f5f0b_450x450_ub6j.jpg"
+                alt="Card image cap"
+              />
+              <div class="card-body">
+                <h5 class="card-title">Apple iPad (2019)</h5>
+                <p class="card-text">
+                  10.2", 32GB, Cellular, Gold
+                </p>
+              </div>
+              <div class="card-footer">
+                <div class="col-md-12">
+                  <div class="d-flex">
+                    <div class="p-2">
+                      <div class="input-group input-group-sm">
+                        <input
+                          type="number"
+                          class="form-control quantity-box"
+                          value="1"
+                          placeholder="Qty."
+                          aria-label="Input group example"
+                          aria-describedby="btnGroupAddon"
+                        />
+                        <div class="input-group-append">
+                          <button
+                            class="btn btn-outline-secondary"
+                            type="button"
+                          >
+                            Add
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="p-2">
+                      <span class="badge badge-danger">2349 lei</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 d-flex">
+            <div class="card text-center m-2">
+              <img
+                class="card-img-top"
+                src="https://s12emagst.akamaized.net/products/29758/29757846/images/res_ed2d4033b49bc4cf1d09a8c51d40c5f5_450x450_knjh.jpg"
+                alt="Card image cap"
+              />
+              <div class="card-body">
+                <h5 class="card-title">Tableta Huawei MatePad Pro</h5>
+                <p class="card-text">
+                  Octa-Core, 10.8", 6GB RAM, 128GB, Wi-Fi, Gray
+                </p>
+              </div>
+              <div class="card-footer">
+                <div class="col-md-12">
+                  <div class="d-flex">
+                    <div class="p-2">
+                      <div class="input-group input-group-sm">
+                        <input
+                          type="number"
+                          class="form-control quantity-box"
+                          value="1"
+                          placeholder="Qty."
+                          aria-label="Input group example"
+                          aria-describedby="btnGroupAddon"
+                        />
+                        <div class="input-group-append">
+                          <button
+                            class="btn btn-outline-secondary"
+                            type="button"
+                          >
+                            Add
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="p-2">
+                      <span class="badge badge-danger">2499 lei</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <nav class="navbar fixed-bottom navbar-light bg-light justify-content-end">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          User Name
+        </li>
+      </ul>
+    </nav>
+
+    <script type="text/javascript">
+      function toggleElement() {
+        LogOutButton = document.getElementById("logout");
+        LogInButton = document.getElementById("login");
+        if (LogOutButton.style.display != "inline") {
+          LogOutButton.style.display = "inline";
+          LogInButton.style.display = "none";
+        } else {
+          LogOutButton.style.display = "none";
+          LogInButton.style.display = "inline";
+        }
+      }
+    </script>
+    <script
+      src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+      integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+      integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
