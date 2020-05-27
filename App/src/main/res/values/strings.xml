@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">SaffronBank</string>
+    <string name="action_settings">Settings</string>
+    <string name="instruction">Place your fingertip on the sensor</string>
+    <string name="terms">
+        Looks like this is the first time you open this app.\n
+        We will need you to agree with some terms and conditions, and also to login for the first time.\n
+        After that you will be able to use your fingerprint in order to login faster.\n
+        Let\'s get started. \n
+        Press Agree to continue</string>
+    <string name="button_agree">Agree</string>
+    <string name="url">soffranbanking.azurewebsites.net</string>
+</resources>
