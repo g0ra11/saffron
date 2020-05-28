@@ -7,8 +7,4 @@ export const products: Product[] = [
     {id:"4" , name: "Tableta Huawei MatePad Pro", description:"Octa-Core, 10.8inch, 6GB RAM, 128GB, Wi-Fi, Gray", price:2499, img:"https://s12emagst.akamaized.net/products/29758/29757846/images/res_ed2d4033b49bc4cf1d09a8c51d40c5f5_450x450_knjh.jpg"},
 ]
 
-export const cartItems: {id: string, name: string, price: number}[] = 
-[
-    {id:"1" , name: "Tableta Samsung Galaxy Tab S6", price:3237},
-    {id:"2" , name: "Apple iPad Pro (2018)", price:4879},
-]
+export const cartItems: Product[] = [];

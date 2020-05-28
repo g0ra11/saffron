@@ -7,13 +7,15 @@ type ProductProps = {
     product: Product;
 }
 
-export function ProductCard(this: any, props: ProductProps) {
+export function ProductCard(props: ProductProps) {
     const [show, setShow] = useState(false);
 
-    const addToCart = (productId: string, productName: string, productPrice: number) => {
-        cartItems.push({ id: productId, name: productName, price: productPrice })
+    const addToCart = (product: Product) => {
+        cartItems.push(product)
         setShow(true);
     }
+
+    
 
     return (
         <>
@@ -39,7 +41,7 @@ export function ProductCard(this: any, props: ProductProps) {
                                             <button
                                                 className="btn btn-outline-secondary"
                                                 type="button"
-                                                onClick={() => addToCart(props.product.id, props.product.name, props.product.price)}
+                                                onClick={() => addToCart(props.product)}
                                             >
                                                 Add
                           </button>
