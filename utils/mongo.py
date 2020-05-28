@@ -52,9 +52,17 @@ class MongoClient:
         doc = self.users_coll.find_one({"_id": email})
         if not doc:
             return None
-        return User(doc)
+        return User(doc).__repr__()
 
+    def modify_balance(self, email, amount):
+        result = self.users_coll.update_one({'_id': email}, {'$inc': {'m': amount}})
 
+    def modify_blocked(self, email, amount):
+        result = self.users_coll.update_one({'_id': email}, {'$inc': {'b': amount}})
+
+	
+
+    
 class User:
     def __init__(self, doc):
         self.email = doc.get("email")
@@ -63,3 +71,11 @@ class User:
         self.hash = doc.get("p")
         self.balance = doc.get("m")
         self.blocked = doc.get("b")
+    def __repr__(self):
+        return dict(email =self.email,
+                    pword = self.hash,
+                    first_name= self.first_name,
+                    last_name = self.last_name,
+                    balance = self.balance,
+                    block = self.blocked
+                    )
