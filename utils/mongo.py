@@ -34,8 +34,9 @@ class MongoClient:
         trans_doc = dict(s=sender, r=reciever, a=amount, d=date)
         self.transactions_coll.insert_one(trans_doc)
 
-    def add_token(self, email, token):
-        token_doc = dict(e=email, t=token)
+    def add_token(self, email, token, amount, reciever):
+        created = datetime.utcnow()
+        token_doc = dict(e=email, t=token, a=amount, r=reciever, c=created)
         try:
             self.tokens_coll.insert_one(token_doc)
         except err.DuplicateKeyError:
@@ -54,6 +55,11 @@ class MongoClient:
             return None
         return User(doc)
 
+    def modify_balance(self, email, amount):
+        result = self.users_coll.update_one({'_id': email}, {'$inc': {'m': amount}})
+
+    def modify_blocked(self, email, amount):
+        result = self.users_coll.update_one({'_id': email}, {'$inc': {'b': amount}})
 
 class User:
     def __init__(self, doc):
