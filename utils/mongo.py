@@ -57,12 +57,6 @@ class MongoClient:
 
     def modify_balance(self, email, amount):
         result = self.users_coll.update_one({'_id': email}, {'$inc': {'m': amount}})
-<<<<<<< HEAD
-=======
-
-    def modify_blocked(self, email, amount):
-        result = self.users_coll.update_one({'_id': email}, {'$inc': {'b': amount}})
->>>>>>> 4b361b50173d33c38362272c57f938212028db5d
 
     def modify_blocked(self, email, amount):
         result = self.users_coll.update_one({'_id': email}, {'$inc': {'b': amount}})
