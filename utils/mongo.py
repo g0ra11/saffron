@@ -74,6 +74,10 @@ class MongoClient:
         result = self.users_coll.update_one({'_id': email}, {'$inc': {'b': amount}})
         return result
 
+    def modify_balance_and_set_blocked(self, email, amount):
+        result = self.users_coll.update_one({'_id': email}, {'$inc': {'m': -amount, 'b': amount}})
+
+
 
 class User:
     def __init__(self, doc):
@@ -83,8 +87,4 @@ class User:
         self.blocked = doc.get("b")
 
     def __repr__(self):
-        return dict(email =self.email,
-                    pword = self.hash,
-                    balance = self.balance,
-                    block = self.blocked
-                    )
+        return {'email': self.email, 'pword': self.hash, 'balance': self.balance, 'block': self.blocked}
