@@ -1,5 +1,5 @@
 # Saffron Banking System
-![](logo.jpg)
+![](saff_logo.jpg)
 ### The project expose a Banking API, a Web Server and an Android Studio App 
  1. The API server is capable of transforming the clients requests into internal messages and put on a rabbit queue. Then, one or more workers will consume the messages from queue and respond. Available requests are: 
  * Check balance
