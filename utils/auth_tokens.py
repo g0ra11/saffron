@@ -1,5 +1,11 @@
 import redis
-import uuid
+import random
+import string
+
+
+def generate_token(stringLength):
+    letters_and_digits = string.ascii_letters + string.digits
+    return ''.join((random.choice(letters_and_digits) for i in range(stringLength)))
 
 
 class AuthManager:
@@ -19,12 +25,7 @@ class AuthManager:
     def _insert_auth_token(self, token, email):
         self.redis_client.set(token, email)
 
-    @staticmethod
-    def _create_token():
-        token = uuid.uuid4()
-        return str(token)
-
     def get_auth_token(self, email):
-        token = self._create_token()
+        token = generate_token(15)
         self._insert_auth_token(token, email)
         return token
