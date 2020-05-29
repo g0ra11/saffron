@@ -2,10 +2,9 @@ import flask
 from utils.red import RQwrap
 from utils.mongo import *
 import json
-import uuid
-from datetime import date
 import hashlib
-
+import random
+import string
 
 red = RQwrap('myq')
 red.refreshQueue()
@@ -18,6 +17,12 @@ mongoclient = MongoClient()
 @app.route('/', methods=['GET'])
 def home():
     return 'Saffron Banking System' 
+
+
+def randomString(stringLength=5):
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(stringLength))
+
 
 
 def get_email_for_token(token):
@@ -124,7 +129,7 @@ def request_money_token():
             'error_code': 42
         })
 
-    paykey = str(uuid.uuid4())
+    paykey = randomString()
 
     try:
         amount = int(amount)
