@@ -10,23 +10,30 @@ mongoclient = MongoClient()
 
 def process(command):
 	
-	com = json.loads(command)
+	command = json.loads(command)
+	print('received', command)
 
-	if com['command'] == 'transfer':
+	if command['command'] == 'transfer':
+		data = mongoclient.get_user_data(command['destination'])
 
-		print(f'I transfered {com["amount"]} from {com["source"]} to {com["destination"]}')
-		mongoclient.modify_blocked(command['source'],float(command["a"]))
-		mongoclient.modify_balance(command['source'],-float(command["a"] ))
-		mongoclient.modify_balance(command['destination'],float(command["a"] ))
-		
-		
+
+		if not data:
+			mongoclient.modify_blocked(command['source'], -command['amount'])
+			mongoclient.modify_balance(command['source'], command['amount'])
+			return
+
+		mongoclient.modify_blocked(command['source'], -command['amount'])
+		mongoclient.modify_balance(command['destination'], command['amount'])
+		mongoclient.add_transaction(command['source'], command['destination'], command['amount'], int(time.time()))
+
+
 while 1:
 	try:
 		message = red.getMessage()
 		process(message['message'])
 		red.ackMessage(message['id'])
-
-	except:
+	except Exception as e:
+		print(e)
 		time.sleep(1)
 
 

@@ -4,37 +4,35 @@ from utils.mongo import *
 import json
 import uuid
 from datetime import date
+import hashlib
+
+
 red = RQwrap('myq')
 red.refreshQueue()
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
-
 mongoclient = MongoClient()
+
 
 @app.route('/', methods=['GET'])
 def home():
     return 'Saffron Banking System' 
 
+
 def get_email_for_token(token):
-    cursor = mongoclient.tokens_coll.find_one(({'t':token}))
-    if cursor:
-        return str(cursor['e'])
-    else: 
-        return json.dumps({
-            'result': 'bad',
-            'error_text': 'No token found',
-            'error_code': 41
-            })
+    return 'adaj@yahoo.com'
+
 
 @app.route('/balance', methods=['GET'])
 def balance():
+
     if 'token' in flask.request.args:
-    	token = flask.request.args['token']
+        token = flask.request.args['token']
     else:
-    	return json.dumps({
+        return json.dumps({
             'result': 'bad',
-            'error_text': 'No token found',
+            'error_text': 'Malformed request',
             'error_code': 41})  
 
     email = get_email_for_token(token)
@@ -42,43 +40,43 @@ def balance():
     if not email:
         return json.dumps({
             'result': 'bad',
-            'error_text': 'No email found',
+            'error_text': 'You have been logged out',
             'error_code': 51
             })
-    
-    print('EMAIL IS ', email)
+
     data = db_search(email)
 
+    if not data:
+        return json.dumps({
+            'result': 'bad',
+            'error_text': 'Something went wrong',
+            'error_code': 51
+            })
+
     return json.dumps({
-        'first_name': data['first_name'],
-        'last_name': data['last_name'],
+        'result': 'good',
         'balance': data['balance']})
 
 
-def db_search(email):   
-    tdct = mongoclient.get_user_data(email)
-    return tdct
+def db_search(email):
+    try:
+        tdct = mongoclient.get_user_data(email)
+    except Exception:
+        return None
 
-def db_register(first_name, last_name,email, pword): 
-    return mongoclient.add_user(email,first_name,last_name,password=pword)    
+    return tdct
 
 
 @app.route('/register', methods=['GET'])
 def register():
     email = None
     pword = None
-    fn = None
-    ln = None
 
     if 'email' in flask.request.args:
         email = flask.request.args['email']
     if 'pword' in flask.request.args:
         pword = flask.request.args['pword']
-    if 'fn' in flask.request.args:
-        fn = flask.request.args['fn']
-    if 'ln' in flask.request.args:
-        ln = flask.request.args['ln']
-    
+
     if not (email and pword):
         return json.dumps({
             'result': 'bad',
@@ -86,33 +84,152 @@ def register():
             'error_code': 135
             })
 
-    db_res = db_search(email)
-    if db_res: #user-ul e deja in db, feel free to modify
+    enc_pass = hashlib.sha256(pword.encode('utf-8')).hexdigest()
+
+    try:
+        mongoclient.add_user(email, password=enc_pass)
+    except UserAlreadyExistsError:
+        return json.dumps({
+                'result': 'bad',
+                'error_text': 'Account already is use, you may want to login or recover',
+                'error_code': 12
+                })
+    except:
+        return json.dumps({
+                'result': 'bad',
+                'error_text': 'Something went wrong',
+                'error_code': 12
+                })
+
+    return json.dumps({'result': 'good'})
+
+
+@app.route('/request_money_token', methods=['GET'])
+def request_money_token():
+    email = None
+    amount = None
+    user = None
+
+    if 'email' in flask.request.args:
+        email = flask.request.args['email']
+    if 'amount' in flask.request.args:
+        amount = flask.request.args['amount']
+    if 'user' in flask.request.args:
+        user = flask.request.args['user']
+
+    if not (email and amount and user):
         return json.dumps({
             'result': 'bad',
-            'error_text': 'Account already is use, you may want to login or recover',
-            'error_code': 12
+            'error_text': 'invalid request',
+            'error_code': 42
+        })
+
+    paykey = str(uuid.uuid4())
+
+    try:
+        amount = int(amount)
+    except ValueError:
+        return json.dumps({
+            'result': 'bad',
+            'error': 'Invalid request',
+            'error_code': 33
             })
 
-    # print(f'registered email {email} and pass {pword}')  #only for debug, will be removed
-    db_register(fn, ln, email, pword)
-    return json.dumps({
-            'result': 'User added successfully',
+    if amount < 0:
+        return json.dumps({
+            'result': 'bad',
+            'error': 'Invalid request',
+            'error_code': 33
             })
-@app.route('/generate_token', methods=['GET'])
-def generate_login_token():
-    email = None
-    if 'email' in flask.request.args:
-        email = flask.request.args['email'] 
+
+    mongoclient.add_token(user, paykey, amount, email)
+    return json.dumps({
+        'result': 'good',
+        'mesage': 'paykey generated ok'
+    })
+
+
+@app.route('/get_my_paykeys', methods=['GET'])
+def get_my_paykeys():
+    token = None
+
+    if 'token' in flask.request.args:
+        token = flask.request.args['token']
+
+    if not token:
+        return json.dumps({
+            'result': 'bad',
+            'error': 'Invalid request data',
+            'error_code': 33
+            })
+
+    email = get_email_for_token(token)
+
     if not email:
         return json.dumps({
             'result': 'bad',
-            'error_text': 'Unable to generate token',
-            'error_code': 42
-        })
-    token = str(uuid.uuid4()) 
-    mongoclient.add_token(email,token)
-    return "Added token to " + str(email) 
+            'error': 'You have been logged out',
+            'error_code': 33
+            })
+
+    paykeys = []
+
+    try:
+        paykeys = mongoclient.get_all_token_for_user(email)
+    except:
+        return json.dumps({
+            'result': 'bad',
+            'error': 'Something went wrong',
+            'error_code': 33
+            })
+
+    return json.dumps({
+        'result': 'good',
+        'paykeys': paykeys
+    })
+
+
+@app.route('/redeem_paykey', methods=['GET'])
+def redeem_paykey():
+    paykey = None
+
+    if 'paykey' in flask.request.args:
+        paykey = flask.request.args['paykey']
+
+    if not paykey:
+        return json.dumps({
+            'result': 'bad',
+            'error': 'Invalid request',
+            'error_code': 33
+            })
+
+    paykey_data = mongoclient.get_token_data(paykey)
+
+    if not paykey_data:
+        return json.dumps({
+            'result': 'bad',
+            'error': 'Invalid token',
+            'error_code': 33
+            })
+
+    message = {
+        'command': 'transfer',
+        'source': paykey_data['e'],
+        'destination': paykey_data['r'],
+        'amount': paykey_data['a']
+        }
+
+    mongoclient.modify_balance(paykey_data['e'], -paykey_data['a'])
+    mongoclient.modify_blocked(paykey_data['e'], paykey_data['a'])
+
+    mongoclient.delete_token(paykey)
+    red.putMessage(json.dumps(message))
+    return json.dumps({
+        'result': 'good',
+        'message': 'request sent'
+    })
+
+
 
 @app.route('/login', methods=['GET'])
 def login():
@@ -132,7 +249,7 @@ def login():
             })
 
     db_res = db_search(email)
-    # print('SEARCH IS ',db_res)
+
     if not db_res:
         return json.dumps({
             'result': 'bad',
@@ -140,15 +257,16 @@ def login():
             'error_code': 23
             })
 
-    if pword != db_res['pword']:
+    enc_pass = hashlib.sha256(pword.encode('utf-8')).hexdigest()
+
+    if enc_pass != db_res['pword']:
         return json.dumps({
             'result': 'bad',
             'error_text': 'Incorrect password',
             'error_code': 22
             })
 
-
-    token = generate_login_token()
+    token = 'fuck'  # DAJ , de adaugat auth token in redis
 
     return json.dumps({
         'result': 'good',
@@ -159,42 +277,66 @@ def login():
 
 @app.route('/transfer', methods=['GET'])
 def transfer():
-    f = None
-    a = None
-    t = None
+    token = None
+    amount = None
+    to = None
 
+    if 'token' in flask.request.args:
+        token = flask.request.args['token']
     if 'amm' in flask.request.args:
-        f = flask.request.args['from']
-        t = flask.request.args['to']
-        a = flask.request.args['amm']
-        print(f, t, a)
-    else:
-    	return json.dumps({
-        'result': 'bad',
-        'error': 'Invalid transfer data',
-        'error_code': 33 
-        }) 
-    
-    
-    balance = db_search(f)
-    if float(balance) < float(a):
+        amount = flask.request.args['amm']
+    if 'to' in flask.request.args:
+        to = flask.request.args['to']
+
+    if not (token and amount and to):
         return json.dumps({
             'result': 'bad',
-            'error_text': 'Exceeded amount',
+            'error': 'Invalid transfer data',
+            'error_code': 33
+            })
+
+    try:
+        amount = int(amount)
+    except ValueError:
+        return json.dumps({
+            'result': 'bad',
+            'error': 'Invalid request',
+            'error_code': 33
+            })
+
+    if amount < 0:
+        return json.dumps({
+            'result': 'bad',
+            'error': 'Invalid request',
+            'error_code': 33
+            })
+
+    email = get_email_for_token(token)  # DAJ, de bagat auth token
+    data = db_search(email)
+    bal = data['balance']
+
+    if bal < amount:
+        return json.dumps({
+            'result': 'bad',
+            'error_text': 'Not enough money',
             'error_code': 32
             })
 
     message = {
-	'command': 'transfer',
-    'source': f,
-    'destination': t,
-    'amount': a
-	}
+        'command': 'transfer',
+        'source': email,
+        'destination': to,
+        'amount': amount
+        }
 
-    mongoclient.add_transaction(f,t,a,date.today())
+    mongoclient.modify_balance(email, -amount)
+    mongoclient.modify_blocked(email, amount)
 
     red.putMessage(json.dumps(message))
-    return 'transfer request sent'
+    return json.dumps({
+        'result': 'good',
+        'message': 'request sent'
+    })
 
 
 app.run()

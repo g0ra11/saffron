@@ -17,7 +17,6 @@ class RQwrap():
         self._q.deleteQueue(qname=self._qname).exceptions(False).execute()
         self._q.createQueue(qname=self._qname, vt=self._ack).execute()
 
-
     def putMessage(self, message):
         return self._q.sendMessage(qname=self._qname).message(message).execute()
 

@@ -23,15 +23,15 @@ class MongoClient:
         self.users_coll = self.database.get_collection("users")
         self.transactions_coll = self.database.get_collection("transactions")
 
-    def add_user(self, email, first_name, last_name, password, api_token=None):
-        user_doc = dict(_id=email, fn=first_name, ln=last_name, p=password, t=api_token, m=0, b=0)
+    def add_user(self, email, password, api_token=None):
+        user_doc = dict(_id=email, p=password, t=api_token, m=0, b=0)
         try:
             self.users_coll.insert_one(user_doc)
         except err.DuplicateKeyError:
             raise UserAlreadyExistsError("Users exists")
 
-    def add_transaction(self, sender, reciever, amount, date):
-        trans_doc = dict(s=sender, r=reciever, a=amount, d=date)
+    def add_transaction(self, sender, receiver, amount, date):
+        trans_doc = dict(s=sender, r=receiver, a=amount, d=date)
         self.transactions_coll.insert_one(trans_doc)
 
     def add_token(self, email, token, amount, reciever):
@@ -46,8 +46,19 @@ class MongoClient:
         cursor = self.tokens_coll.find({"e": email})
         token_list = []
         for doc in cursor:
-            token_list.append(doc.get('t'))
+            token_list.append({
+                'paykey': doc.get('t'),
+                'email': doc.get('r'),
+                'amount': doc.get('a')
+            })
         return token_list
+
+    def get_token_data(self, token):
+        token = self.tokens_coll.find_one({"t": token})
+        return token
+
+    def delete_token(self, token):
+        self.tokens_coll.remove({'t': token})
 
     def get_user_data(self, email):
         doc = self.users_coll.find_one({"_id": email})
@@ -57,26 +68,23 @@ class MongoClient:
 
     def modify_balance(self, email, amount):
         result = self.users_coll.update_one({'_id': email}, {'$inc': {'m': amount}})
+        return result
 
     def modify_blocked(self, email, amount):
         result = self.users_coll.update_one({'_id': email}, {'$inc': {'b': amount}})
+        return result
 
-	
 
-    
 class User:
     def __init__(self, doc):
         self.email = doc.get("email")
-        self.first_name = doc.get("fn")
-        self.last_name = doc.get("ln")
         self.hash = doc.get("p")
         self.balance = doc.get("m")
         self.blocked = doc.get("b")
+
     def __repr__(self):
         return dict(email =self.email,
                     pword = self.hash,
-                    first_name= self.first_name,
-                    last_name = self.last_name,
                     balance = self.balance,
                     block = self.blocked
                     )
