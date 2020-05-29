@@ -23,8 +23,8 @@ class MongoClient:
         self.users_coll = self.database.get_collection("users")
         self.transactions_coll = self.database.get_collection("transactions")
 
-    def add_user(self, email, password, api_token=None):
-        user_doc = dict(_id=email, p=password, t=api_token, m=0, b=0)
+    def add_user(self, email, password):
+        user_doc = dict(_id=email, p=password, m=0, b=0)
         try:
             self.users_coll.insert_one(user_doc)
         except err.DuplicateKeyError:
@@ -74,6 +74,10 @@ class MongoClient:
         result = self.users_coll.update_one({'_id': email}, {'$inc': {'b': amount}})
         return result
 
+    def modify_balance_and_set_blocked(self, email, amount):
+        result = self.users_coll.update_one({'_id': email}, {'$inc': {'m': -amount, 'b': amount}})
+        return result
+
 
 class User:
     def __init__(self, doc):
@@ -83,8 +87,4 @@ class User:
         self.blocked = doc.get("b")
 
     def __repr__(self):
-        return dict(email =self.email,
-                    pword = self.hash,
-                    balance = self.balance,
-                    block = self.blocked
-                    )
+        return {'email': self.email, 'pword': self.hash, 'balance': self.balance, 'block': self.blocked}

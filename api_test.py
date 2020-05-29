@@ -1,11 +1,9 @@
 import flask
 from utils.red import RQwrap
 from utils.mongo import *
+from utils.auth_tokens import *
 import json
-import uuid
-from datetime import date
 import hashlib
-
 
 red = RQwrap('myq')
 red.refreshQueue()
@@ -13,27 +11,27 @@ red.refreshQueue()
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 mongoclient = MongoClient()
+auth_manger = AuthManager()
 
 
 @app.route('/', methods=['GET'])
 def home():
-    return 'Saffron Banking System' 
+    return 'Saffron Banking System'
 
 
 def get_email_for_token(token):
-    return 'adaj@yahoo.com'
+    return auth_manger.get_email_for_token(token)
 
 
 @app.route('/balance', methods=['GET'])
 def balance():
-
     if 'token' in flask.request.args:
         token = flask.request.args['token']
     else:
         return json.dumps({
             'result': 'bad',
             'error_text': 'Malformed request',
-            'error_code': 41})  
+            'error_code': 41})
 
     email = get_email_for_token(token)
 
@@ -42,29 +40,20 @@ def balance():
             'result': 'bad',
             'error_text': 'You have been logged out',
             'error_code': 51
-            })
+        })
 
-    data = db_search(email)
+    data = mongoclient.get_user_data()
 
     if not data:
         return json.dumps({
             'result': 'bad',
             'error_text': 'Something went wrong',
             'error_code': 51
-            })
+        })
 
     return json.dumps({
         'result': 'good',
         'balance': data['balance']})
-
-
-def db_search(email):
-    try:
-        tdct = mongoclient.get_user_data(email)
-    except Exception:
-        return None
-
-    return tdct
 
 
 @app.route('/register', methods=['GET'])
@@ -82,7 +71,7 @@ def register():
             'result': 'bad',
             'error_text': 'Invalid email and password',
             'error_code': 135
-            })
+        })
 
     enc_pass = hashlib.sha256(pword.encode('utf-8')).hexdigest()
 
@@ -90,18 +79,27 @@ def register():
         mongoclient.add_user(email, password=enc_pass)
     except UserAlreadyExistsError:
         return json.dumps({
-                'result': 'bad',
-                'error_text': 'Account already is use, you may want to login or recover',
-                'error_code': 12
-                })
-    except:
+            'result': 'bad',
+            'error_text': 'Account already is use, you may want to login or recover',
+            'error_code': 12
+        })
+    except Exception:
         return json.dumps({
-                'result': 'bad',
-                'error_text': 'Something went wrong',
-                'error_code': 12
-                })
+            'result': 'bad',
+            'error_text': 'Something went wrong',
+            'error_code': 12
+        })
 
     return json.dumps({'result': 'good'})
+
+
+def insert_paykey(user, amount, email):
+    paykey = generate_token(5)
+    try:
+        mongoclient.add_token(user, paykey, amount, email)
+    except TokenExistsError:
+        return False
+    return True
 
 
 @app.route('/request_money_token', methods=['GET'])
@@ -124,8 +122,6 @@ def request_money_token():
             'error_code': 42
         })
 
-    paykey = str(uuid.uuid4())
-
     try:
         amount = int(amount)
     except ValueError:
@@ -133,16 +129,18 @@ def request_money_token():
             'result': 'bad',
             'error': 'Invalid request',
             'error_code': 33
-            })
+        })
 
     if amount < 0:
         return json.dumps({
             'result': 'bad',
             'error': 'Invalid request',
             'error_code': 33
-            })
+        })
 
-    mongoclient.add_token(user, paykey, amount, email)
+    while not insert_paykey(user, amount, email):
+        continue
+
     return json.dumps({
         'result': 'good',
         'mesage': 'paykey generated ok'
@@ -161,7 +159,7 @@ def get_my_paykeys():
             'result': 'bad',
             'error': 'Invalid request data',
             'error_code': 33
-            })
+        })
 
     email = get_email_for_token(token)
 
@@ -170,18 +168,16 @@ def get_my_paykeys():
             'result': 'bad',
             'error': 'You have been logged out',
             'error_code': 33
-            })
+        })
 
     paykeys = []
-
-    try:
-        paykeys = mongoclient.get_all_token_for_user(email)
-    except:
+    paykeys = mongoclient.get_all_token_for_user(email)
+    if not paykeys:
         return json.dumps({
             'result': 'bad',
             'error': 'Something went wrong',
             'error_code': 33
-            })
+        })
 
     return json.dumps({
         'result': 'good',
@@ -201,7 +197,7 @@ def redeem_paykey():
             'result': 'bad',
             'error': 'Invalid request',
             'error_code': 33
-            })
+        })
 
     paykey_data = mongoclient.get_token_data(paykey)
 
@@ -210,14 +206,14 @@ def redeem_paykey():
             'result': 'bad',
             'error': 'Invalid token',
             'error_code': 33
-            })
+        })
 
     message = {
         'command': 'transfer',
         'source': paykey_data['e'],
         'destination': paykey_data['r'],
         'amount': paykey_data['a']
-        }
+    }
 
     mongoclient.modify_balance(paykey_data['e'], -paykey_data['a'])
     mongoclient.modify_blocked(paykey_data['e'], paykey_data['a'])
@@ -228,7 +224,6 @@ def redeem_paykey():
         'result': 'good',
         'message': 'request sent'
     })
-
 
 
 @app.route('/login', methods=['GET'])
@@ -246,16 +241,16 @@ def login():
             'result': 'bad',
             'error_text': 'Incorrect email and password',
             'error_code': 232
-            })
+        })
 
-    db_res = db_search(email)
+    db_res = mongoclient.get_user_data(email)
 
     if not db_res:
         return json.dumps({
             'result': 'bad',
             'error_text': 'Email not found',
             'error_code': 23
-            })
+        })
 
     enc_pass = hashlib.sha256(pword.encode('utf-8')).hexdigest()
 
@@ -264,15 +259,15 @@ def login():
             'result': 'bad',
             'error_text': 'Incorrect password',
             'error_code': 22
-            })
+        })
 
-    token = 'fuck'  # DAJ , de adaugat auth token in redis
+    token = auth_manger.get_auth_token(email)
 
     return json.dumps({
         'result': 'good',
         'token': token,
-        'message': 'Login successfully' 
-        })       
+        'message': 'Login successfully'
+    })
 
 
 @app.route('/transfer', methods=['GET'])
@@ -293,7 +288,7 @@ def transfer():
             'result': 'bad',
             'error': 'Invalid transfer data',
             'error_code': 33
-            })
+        })
 
     try:
         amount = int(amount)
@@ -302,17 +297,17 @@ def transfer():
             'result': 'bad',
             'error': 'Invalid request',
             'error_code': 33
-            })
+        })
 
     if amount < 0:
         return json.dumps({
             'result': 'bad',
             'error': 'Invalid request',
             'error_code': 33
-            })
+        })
 
     email = get_email_for_token(token)  # DAJ, de bagat auth token
-    data = db_search(email)
+    data = mongoclient.get_user_data(email)
     bal = data['balance']
 
     if bal < amount:
@@ -320,14 +315,14 @@ def transfer():
             'result': 'bad',
             'error_text': 'Not enough money',
             'error_code': 32
-            })
+        })
 
     message = {
         'command': 'transfer',
         'source': email,
         'destination': to,
         'amount': amount
-        }
+    }
 
     mongoclient.modify_balance(email, -amount)
     mongoclient.modify_blocked(email, amount)
