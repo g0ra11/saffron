@@ -17,7 +17,6 @@ function Cart() {
   const removeFromCart = () => {
     let index = cartItems.indexOf(selectedProduct);
     cartItems.splice(index, 1);
-    setSubmitModalShow(false);
   };
 
   return (
