@@ -90,12 +90,12 @@ function HorizontalLabelPositionBelowStepper(props: StepperProps) {
             <div>
                 {activeStep === steps.length ? (
                     <div>
-                        <Typography className={classes.instructions}>All steps completed</Typography>
+                        <Typography component={'span'} className={classes.instructions}>All steps completed</Typography>
                         <Button onClick={handleReset}>Reset</Button>
                     </div>
                 ) : (
                         <div>
-                            <Typography className={classes.instructions}>{getStepContent(activeStep, props.amount)}</Typography>
+                            <Typography component={'span'} className={classes.instructions}>{getStepContent(activeStep, props.amount)}</Typography>
                             <div>
                                 <Button
                                     disabled={activeStep === 0}

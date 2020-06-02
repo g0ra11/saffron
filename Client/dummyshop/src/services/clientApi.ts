@@ -3,7 +3,7 @@ import { handleError } from "./apiUtils";
 
 export const requestPaymentToken = async (email: string, amount: string) => {
     try {
-        return axiosClient.get("request_money_token?email=" + email + "&amount=" + amount + "&user=adaj@yahoo.com");
+        return axiosClient.get("request_money_token?email=" + email + "&amount=" + amount + "&user=test");
     }
     catch (handleError) {
         return handleError(handleError);
